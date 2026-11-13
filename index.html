@@ -100,6 +100,17 @@ body::before {
 .ghost-btn:active { transform: scale(.98); }
 .copy-ok { text-align: center; color: #7fd08a; font-size: 13.5px; margin-top: 10px; min-height: 19px; }
 .disclaimer { color: #8f8073; font-size: 12px; line-height: 1.8; margin-top: 20px; text-align: center; }
+/* gallery */
+.gallery-title { font-size: 18px; font-weight: 800; margin: 30px 4px 4px; }
+.gallery-title .hl { color: #ff8c2e; }
+.gallery-sub { color: #c9b8a6; font-size: 13.5px; margin: 0 4px 14px; line-height: 1.6; }
+.gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.gallery-grid img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 12px; border: 1px solid rgba(255,170,60,.22); cursor: pointer; display: block; }
+#lightbox { position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.93); display: none; align-items: center; justify-content: center; padding: 20px; }
+#lightbox.open { display: flex; }
+#lightbox img { max-width: 100%; max-height: 88vh; border-radius: 12px; }
+#lightbox .lb-close { position: absolute; top: 14px; right: 22px; color: #fff; font-size: 34px; cursor: pointer; line-height: 1; }
+.consult-line { text-align: center; color: #ffb37a; font-size: 14px; margin-top: 18px; line-height: 1.8; }
 #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 40; }
 </style>
 </head>
@@ -117,9 +128,24 @@ body::before {
       <span class="badge">🏋️ 教练本人 2 年实测</span>
       <span class="badge">胸肩背一周三练</span>
       <span class="badge">健身房 · 不控饮食</span>
+      <span class="badge">💬 终身免费咨询</span>
     </div>
     <button class="big-btn" id="startBtn">开始测试</button>
-    <div class="cover-note">薄肌不用大重量，动作标准、坚持练，线条自然出来。<br>本计划为通用健身参考，有伤病请先咨询医生。</div>
+    <div class="cover-note">薄肌不用大重量，动作标准、坚持练，线条自然出来。<br>终身免费咨询，练的时候有问题直接私聊我。<br>本计划为通用健身参考，有伤病请先咨询医生。</div>
+
+    <div class="gallery-title">📸 教练实拍 · <span class="hl">练了两年就这样</span></div>
+    <div class="gallery-sub">点开可以放大看。照片都是教练本人，健身房和家里实拍。</div>
+    <div class="gallery-grid" id="galleryGrid">
+      <img src="gallery-01.jpg" alt="教练实拍 1">
+      <img src="gallery-02.jpg" alt="教练实拍 2">
+      <img src="gallery-03.jpg" alt="教练实拍 3">
+      <img src="gallery-04.jpg" alt="教练实拍 4">
+      <img src="gallery-05.jpg" alt="教练实拍 5">
+      <img src="gallery-06.jpg" alt="教练实拍 6">
+      <img src="gallery-07.jpg" alt="教练实拍 7">
+      <img src="gallery-08.jpg" alt="教练实拍 8">
+      <img src="gallery-09.jpg" alt="教练实拍 9">
+    </div>
   </div>
 
   <!-- question -->
@@ -164,6 +190,7 @@ body::before {
         <img src="coach.jpg" alt="教练本人">
         <p>这份计划按我自己的练法改的：我练了两年，<b>胸肩背一周三练，在健身房，不控饮食</b>。薄肌不用大重量，动作标准、坚持练，线条自然出来。先按计划练满 4 周，拍张照对比一下。</p>
       </div>
+      <p style="margin-top:12px">💬 <b>终身免费咨询</b>：练的时候遇到问题，直接私聊我。</p>
     </div>
 
     <button class="big-btn" id="copyBtn">一键复制计划</button>
@@ -173,6 +200,7 @@ body::before {
   </div>
 
 </div>
+<div id="lightbox"><span class="lb-close" id="lbClose">×</span><img id="lbImg" src="" alt="实拍大图"></div>
 <script>
 
 // ---------- questions ----------
@@ -385,6 +413,16 @@ document.body.appendChild(ta); ta.select();
 try { document.execCommand("copy");} catch (e) {}
 document.body.removeChild(ta);
 }
+
+// ---------- gallery lightbox ----------
+document.querySelectorAll("#galleryGrid img").forEach(function (img) {
+  img.onclick = function () {
+    $("lbImg").src = img.src;
+    $("lightbox").classList.add("open");
+  };
+});
+$("lbClose").onclick = function () { $("lightbox").classList.remove("open"); };
+$("lightbox").onclick = function (e) { if (e.target.id === "lightbox" || e.target.id === "lbImg") $("lightbox").classList.remove("open"); };
 
 // ---------- music: Web Audio, light loop ----------
 var audioCtx = null, master = null, musicTimer = null, soundOn = true, nextTime = 0, step = 0;
