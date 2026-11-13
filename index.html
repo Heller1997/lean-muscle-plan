@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>测一测你的薄肌健身计划</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: #141110;
+  color: #f5efe8;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(600px 400px at 85% -5%, rgba(255,122,26,.22), transparent 60%),
+    radial-gradient(500px 500px at -10% 40%, rgba(255,170,60,.10), transparent 60%),
+    radial-gradient(700px 500px at 50% 110%, rgba(255,122,26,.12), transparent 60%);
+}
+#app { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; min-height: 100vh; padding: 18px 18px 40px; }
+.screen { display: none; animation: fadeUp .45s ease; }
+.screen.active { display: block; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+/* music toggle */
+#musicBtn {
+  position: fixed; top: 14px; right: 14px; z-index: 50;
+  width: 42px; height: 42px; border-radius: 50%;
+  background: rgba(255,122,26,.16); border: 1px solid rgba(255,122,26,.45);
+  color: #ffb37a; font-size: 19px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+#musicBtn.off { opacity: .45; }
+
+/* cover */
+.hero { border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,170,60,.25); box-shadow: 0 12px 40px rgba(0,0,0,.5); }
+.hero img { width: 100%; display: block; }
+.cover-title { font-size: 30px; line-height: 1.3; font-weight: 800; margin: 22px 4px 0; letter-spacing: 1px; }
+.cover-title .hl { color: #ff8c2e; }
+.cover-sub { margin: 10px 4px 0; color: #c9b8a6; font-size: 15px; line-height: 1.7; }
+.badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 4px 0; }
+.badge { font-size: 12.5px; padding: 6px 12px; border-radius: 999px; background: rgba(255,122,26,.14); border: 1px solid rgba(255,122,26,.4); color: #ffb37a; }
+.big-btn {
+  display: block; width: 100%; margin-top: 24px; padding: 17px 0;
+  border: none; border-radius: 16px; cursor: pointer;
+  background: linear-gradient(135deg, #ff8c2e, #ff5e1a);
+  color: #fff; font-size: 18px; font-weight: 700; letter-spacing: 2px;
+  box-shadow: 0 8px 24px rgba(255,94,26,.4);
+}
+.big-btn:active { transform: scale(.98); }
+.cover-note { text-align: center; color: #8f8073; font-size: 12.5px; margin-top: 14px; line-height: 1.7; }
+
+/* questions */
+.progress-wrap { margin: 8px 2px 0; }
+.progress-text { font-size: 13px; color: #c9b8a6; display: flex; justify-content: space-between; }
+.progress-bar { height: 8px; background: rgba(255,255,255,.09); border-radius: 99px; margin-top: 8px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #ff8c2e, #ffb347); border-radius: 99px; transition: width .35s ease; }
+.q-title { font-size: 23px; font-weight: 800; line-height: 1.45; margin: 26px 2px 6px; }
+.q-hint { color: #c9b8a6; font-size: 13.5px; margin: 0 2px 20px; line-height: 1.6; }
+.opt {
+  display: block; width: 100%; text-align: left; margin-bottom: 12px; padding: 17px 18px;
+  background: #221d1a; border: 1.5px solid rgba(255,255,255,.09); border-radius: 16px;
+  color: #f5efe8; font-size: 16.5px; line-height: 1.5; cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.opt:active { border-color: #ff8c2e; background: #2e241c; transform: scale(.99); }
+.opt .opt-sub { display: block; font-size: 13px; color: #b8a99a; margin-top: 4px; }
+.back-btn { background: none; border: none; color: #8f8073; font-size: 14px; margin-top: 8px; cursor: pointer; padding: 8px 2px; }
+
+/* result */
+.result-kicker { color: #ff8c2e; font-size: 13px; font-weight: 700; letter-spacing: 2px; margin-top: 6px; }
+.result-title { font-size: 27px; font-weight: 800; line-height: 1.35; margin: 8px 0 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
+.chip { font-size: 12.5px; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); color: #e8dccf; }
+.card { background: #221d1a; border: 1px solid rgba(255,255,255,.08); border-radius: 18px; padding: 18px; margin-top: 16px; }
+.card h3 { font-size: 16.5px; margin-bottom: 12px; }
+.card h3 .dot { color: #ff8c2e; }
+.day-name { font-size: 15.5px; font-weight: 700; margin: 14px 0 8px; color: #ffb37a; }
+.day-name:first-of-type { margin-top: 0; }
+.ex-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 2px; border-bottom: 1px solid rgba(255,255,255,.06); font-size: 15px; }
+.ex-row:last-child { border-bottom: none; }
+.ex-row .sets { color: #ffb37a; font-size: 13.5px; white-space: nowrap; margin-left: 12px; }
+.star { color: #ff8c2e; font-weight: 700; }
+.card p { font-size: 14.5px; line-height: 1.85; color: #ddd2c5; }
+.card p + p { margin-top: 8px; }
+.card p b { color: #ffb37a; }
+.coach-box { display: flex; gap: 14px; align-items: flex-start; }
+.coach-box img { width: 92px; border-radius: 12px; flex-shrink: 0; border: 1px solid rgba(255,170,60,.3); }
+.coach-box p { font-size: 14px; line-height: 1.85; color: #ddd2c5; }
+.coach-box p b { color: #ffb37a; }
+.ghost-btn {
+  display: block; width: 100%; margin-top: 14px; padding: 15px 0;
+  background: transparent; border: 1.5px solid rgba(255,140,46,.55); border-radius: 16px;
+  color: #ffb37a; font-size: 16px; font-weight: 700; cursor: pointer;
+}
+.ghost-btn:active { transform: scale(.98); }
+.copy-ok { text-align: center; color: #7fd08a; font-size: 13.5px; margin-top: 10px; min-height: 19px; }
+.disclaimer { color: #8f8073; font-size: 12px; line-height: 1.8; margin-top: 20px; text-align: center; }
+#confetti { position: fixed; inset: 0; pointer-events: none; z-index: 40; }
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<button id="musicBtn" title="音乐开关">🎵</button>
+<div id="app">
+
+  <!-- cover -->
+  <div class="screen active" id="screen-cover">
+    <div class="hero"><img src="cover.jpg" alt="教练本人"></div>
+    <div class="cover-title">测一测你的<br><span class="hl">薄肌健身计划</span></div>
+    <div class="cover-sub">6 道题，1 分钟，按你的情况生成一份专属薄肌训练计划。动作、组数、饮食，一次给全。</div>
+    <div class="badge-row">
+      <span class="badge">🏋️ 教练本人 2 年实测</span>
+      <span class="badge">胸肩背一周三练</span>
+      <span class="badge">健身房 · 不控饮食</span>
+    </div>
+    <button class="big-btn" id="startBtn">开始测试</button>
+    <div class="cover-note">薄肌不用大重量，动作标准、坚持练，线条自然出来。<br>本计划为通用健身参考，有伤病请先咨询医生。</div>
+  </div>
+
+  <!-- question -->
+  <div class="screen" id="screen-q">
+    <div class="progress-wrap">
+      <div class="progress-text"><span id="qCount">第 1 / 6 题</span><span id="qPct">0%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="qFill" style="width:0%"></div></div>
+    </div>
+    <div class="q-title" id="qTitle"></div>
+    <div class="q-hint" id="qHint"></div>
+    <div id="opts"></div>
+    <button class="back-btn" id="backBtn">← 上一题</button>
+  </div>
+
+  <!-- result -->
+  <div class="screen" id="screen-result">
+    <div class="result-kicker">你的专属计划</div>
+    <div class="result-title" id="planTitle"></div>
+    <div class="chips" id="planChips"></div>
+
+    <div class="card">
+      <h3><span class="dot">●</span> 每周训练安排</h3>
+      <div id="planDays"></div>
+      <p id="absNote" style="display:none"></p>
+      <p id="cardioNote" style="display:none"></p>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot">●</span> 饮食建议</h3>
+      <p id="dietText"></p>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot">●</span> 练之前先看</h3>
+      <p>每次练前热身 5–10 分钟（跑步机快走 + 动态拉伸），练后拉伸 5 分钟。动作标准优先于重量，重量选能标准做完规定次数的。关节疼立刻停，别硬撑。同一部位隔 48 小时再练，保证休息，肌肉是休息时长出来的。</p>
+      <p>计划按 4 周一个周期：4 周后每个动作加一点重量或 1 组，慢慢往上加，别一次加太多。</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot">●</span> 教练的话</h3>
+      <div class="coach-box">
+        <img src="coach.jpg" alt="教练本人">
+        <p>这份计划按我自己的练法改的：我练了两年，<b>胸肩背一周三练，在健身房，不控饮食</b>。薄肌不用大重量，动作标准、坚持练，线条自然出来。先按计划练满 4 周，拍张照对比一下。</p>
+      </div>
+    </div>
+
+    <button class="big-btn" id="copyBtn">一键复制计划</button>
+    <div class="copy-ok" id="copyOk"></div>
+    <button class="ghost-btn" id="againBtn">重新测一次</button>
+    <div class="disclaimer">本计划为通用健身参考，不构成医疗建议。<br>有伤病或身体不适，请先咨询医生再练。</div>
+  </div>
+
+</div>
+<script>
+
+// ---------- questions ----------
+var QUESTIONS = [
+{ key: "goal", title: "你的目标是什么？", hint: "目标不同，练法和饮食都不一样，先定方向。",
+opts: [
+{ t: "减脂，显出线条", s: "体脂下来，腹肌和线条才看得见", v: 0},
+{ t: "增肌，变壮变大", s: "体重往上走，围度变大", v: 1},
+{ t: "保持身材，线条更明显", s: "不增不减，把线条练出来", v: 2}]},
+{ key: "exp", title: "你练了多久？", hint: "新手和老手的组数、重量完全不一样。",
+opts: [
+{ t: "没练过", s: "第一次系统训练", v: 0},
+{ t: "3 个月以内", s: "刚入门，动作还在找感觉", v: 1},
+{ t: "3 个月到 1 年", s: "动作基本会了", v: 2},
+{ t: "1 年以上", s: "老手了，能自己加重量", v: 3}]},
+{ key: "days", title: "每周能练几天？", hint: "按你的时间排，别排一个坚持不了的计划。",
+opts: [
+{ t: "2 天", s: "时间紧，两天也要练到位", v: 0},
+{ t: "3 天", s: "一周三练，最经典", v: 1},
+{ t: "4 天及以上", s: "时间充裕，可以分得更细", v: 2}]},
+{ key: "place", title: "你在哪练？", hint: "器械不同，动作也不同。",
+opts: [
+{ t: "健身房", s: "杠铃、哑铃、器械都有", v: 0},
+{ t: "家里，有哑铃", s: "一副哑铃就能练", v: 1},
+{ t: "家里，徒手", s: "什么器械都没有", v: 2}]},
+{ key: "diet", title: "饮食怎么安排？", hint: "如实选，计划会按你的饮食习惯给建议。",
+opts: [
+{ t: "不控制，想吃就吃", s: "和教练本人一样", v: 0},
+{ t: "稍微注意", s: "少油少糖，饮料少喝", v: 1},
+{ t: "严格控制", s: "算着吃，目标明确", v: 2}]},
+{ key: "focus", title: "最想练哪个部位？", hint: "这个部位会标 ★，多做 1 组。",
+opts: [
+{ t: "胸", s: "胸肌挺起来", v: 0},
+{ t: "肩", s: "肩宽显头小", v: 1},
+{ t: "背", s: "倒三角的底子", v: 2},
+{ t: "腹肌", s: "线条最直观", v: 3},
+{ t: "全身均衡", s: "哪个都不落下", v: 4}]}
+];
+
+// ---------- exercises: gym / dumbbell / bodyweight ----------
+var EX = {
+chest: {
+gym: ["杠铃卧推", "上斜哑铃卧推", "哑铃飞鸟", "绳索夹胸"],
+db: ["哑铃卧推", "上斜哑铃卧推", "哑铃飞鸟", "窄距俯卧撑"],
+bw: ["俯卧撑", "宽距俯卧撑", "上斜俯卧撑", "钻石俯卧撑"]},
+shoulder: {
+gym: ["哑铃推举", "侧平举", "俯身飞鸟", "面拉"],
+db: ["哑铃推举", "侧平举", "俯身飞鸟", "阿诺德推举"],
+bw: ["靠墙倒立撑", "俯卧撑", "水瓶侧平举", "水瓶俯身飞鸟"]},
+back: {
+gym: ["引体向上", "高位下拉", "杠铃划船", "坐姿划船"],
+db: ["单臂哑铃划船", "俯身哑铃划船", "弹力带下拉", "哑铃硬拉"],
+bw: ["引体向上", "澳洲引体", "超人式", "书包俯身划船"]},
+leg: {
+gym: ["深蹲", "腿举", "腿弯举", "站姿提踵"],
+db: ["高脚杯深蹲", "哑铃箭步蹲", "哑铃罗马尼亚硬拉", "哑铃提踵"],
+bw: ["深蹲", "箭步蹲", "单腿深蹲", "跳深蹲"]},
+abs: ["卷腹", "悬垂举腿", "平板支撑", "俄罗斯转体"],
+arm: {
+gym: ["杠铃弯举", "哑铃弯举", "绳索下压", "仰卧臂屈伸"],
+db: ["哑铃弯举", "锤式弯举", "哑铃颈后臂屈伸", "窄距俯卧撑"],
+bw: ["窄距俯卧撑", "凳上臂屈伸", "毛巾弯举", "钻石俯卧撑"]}
+};
+var PART_NAME = { chest: "胸", shoulder: "肩", back: "背", leg: "腿", abs: "腹肌", arm: "手臂"};
+var FOCUS_PART = ["chest", "shoulder", "back", "abs", null];
+
+// ---------- state ----------
+var answers = {};
+var qi = 0;
+var planText = "";
+
+// ---------- helpers ----------
+function $(id) { return document.getElementById(id);}
+function show(id) {
+document.querySelectorAll(".screen").forEach(function (s) { s.classList.remove("active");});
+$(id).classList.add("active");
+window.scrollTo(0, 0);
+}
+
+// ---------- question flow ----------
+function renderQ() {
+var q = QUESTIONS[qi];
+$("qCount").textContent = "第 " + (qi + 1) + " / " + QUESTIONS.length + " 题";
+$("qPct").textContent = Math.round(qi / QUESTIONS.length * 100) + "%";
+$("qFill").style.width = (qi / QUESTIONS.length * 100) + "%";
+$("qTitle").textContent = q.title;
+$("qHint").textContent = q.hint;
+$("backBtn").style.visibility = qi === 0? "hidden": "visible";
+var box = $("opts");
+box.innerHTML = "";
+q.opts.forEach(function (o) {
+var b = document.createElement("button");
+b.className = "opt";
+b.innerHTML = o.t + (o.s? '<span class="opt-sub">' + o.s + "</span>": "");
+b.onclick = function () {
+answers[q.key] = o.v;
+blip();
+if (qi < QUESTIONS.length - 1) { qi++; renderQ();}
+else { showResult();}
+};
+box.appendChild(b);
+});
+}
+$("backBtn").onclick = function () { if (qi > 0) { qi--; renderQ();}};
+$("startBtn").onclick = function () { startMusic(); qi = 0; answers = {}; renderQ(); show("screen-q");};
+$("againBtn").onclick = function () { qi = 0; answers = {}; renderQ(); show("screen-q");};
+
+// ---------- plan logic ----------
+function levelInfo(exp) {
+if (exp <= 1) return { name: "新手", sets: 3, reps: "12 次", tip: "重量选能标准做完 12 次的，别贪重"};
+if (exp === 2) return { name: "进阶", sets: 4, reps: "10 次", tip: "最后一组做到接近力竭"};
+return { name: "老手", sets: 4, reps: "8–12 次", tip: "每两周加一点重量或次数，渐进超负荷"};
+}
+function placeKey(place) { return place === 0? "gym": (place === 1? "db": "bw");}
+function placeName(place) { return place === 0? "健身房": (place === 1? "家里 · 哑铃": "家里 · 徒手");}
+function goalName(goal) { return goal === 0? "减脂": (goal === 1? "增肌": "塑形");}
+
+function buildDays(a) {
+var days = a.days;
+if (days === 0) return [
+{ name: "A 日 · 胸 + 背", parts: ["chest", "back"]},
+{ name: "B 日 · 肩 + 腿 + 腹", parts: ["shoulder", "leg", "abs"]}];
+if (days === 1) return [
+{ name: "第 1 天 · 胸", parts: ["chest"]},
+{ name: "第 2 天 · 肩", parts: ["shoulder"]},
+{ name: "第 3 天 · 背", parts: ["back"]}];
+return [
+{ name: "第 1 天 · 胸", parts: ["chest"]},
+{ name: "第 2 天 · 背", parts: ["back"]},
+{ name: "第 3 天 · 肩 + 手臂", parts: ["shoulder", "arm"]},
+{ name: "第 4 天 · 腿 + 腹", parts: ["leg", "abs"]}];
+}
+
+function dietText(a) {
+if (a.diet === 0) return "教练本人也不严格控饮食，薄肌主要靠练出来。先按计划练满 4 周，线条出来了再说。想更快出线条：饮料换成水，夜宵少吃，就这两点先做到。";
+if (a.diet === 1) return "少油少糖，饮料换成水，每餐保证一份蛋白（鸡蛋、鸡胸肉、豆腐都行）。不用算热量，先把这两点做到，配合训练线条出得很快。";
+return "每天蛋白按体重每公斤 1.6–2 克吃（比如 70 公斤就是 112–140 克），碳水放在练前后吃，睡前 3 小时不吃大餐。蛋白不够就加两个鸡蛋或一杯牛奶。";
+}
+
+function showResult() {
+var a = answers;
+var lv = levelInfo(a.exp);
+var pk = placeKey(a.place);
+var focusPart = FOCUS_PART[a.focus];
+var title = lv.name + " · " + goalName(a.goal) + "薄肌计划";
+$("planTitle").textContent = title;
+
+var chips = [
+"每周 " + (a.days === 0? "2 天": (a.days === 1? "3 天": "4 天+")),
+placeName(a.place),
+"4 周一周期",
+lv.name + " · " + lv.sets + "组 × " + lv.reps
+];
+$("planChips").innerHTML = chips.map(function (c) { return '<span class="chip">' + c + "</span>";}).join("");
+
+var days = buildDays(a);
+var html = "";
+var textLines = ["", "每周 " + (a.days === 0? "2 天": (a.days === 1? "3 天": "4 天+")) + " · " + placeName(a.place) + " · 4 周一周期", ""];
+days.forEach(function (d) {
+html += '<div class="day-name">' + d.name + "</div>";
+textLines.push(d.name);
+d.parts.forEach(function (part) {
+var list = part === "abs"? EX.abs: EX[part][pk];
+var isFocus = (focusPart === part);
+list.forEach(function (ex) {
+var sets = lv.sets + (isFocus? 1: 0);
+var star = isFocus? ' <span class="star">★重点</span>': "";
+html += '<div class="ex-row"><span>' + ex + star + '</span><span class="sets">' + sets + "组 × " + lv.reps + "</span></div>";
+textLines.push(" " + ex + (isFocus? " ★重点": "") + " " + sets + "组 × " + lv.reps);
+});
+});
+textLines.push("");
+});
+html += '<p style="margin-top:10px">💡 ' + lv.tip + "。最想练的部位标了 ★，多做 1 组。</p>";
+textLines.push("提示：" + lv.tip + "；最想练的部位多做 1 组。", "");
+$("planDays").innerHTML = html;
+
+var absNote = $("absNote"), cardioNote = $("cardioNote");
+if (a.days === 1) {
+absNote.style.display = "block";
+absNote.innerHTML = "<b>腹肌加餐：</b>每次练完加 2 个腹肌动作——卷腹 3组×15次 + 平板支撑 3组×45秒。";
+textLines.push("腹肌加餐：每次练完 卷腹 3组×15次 + 平板支撑 3组×45秒。", "");
+} else { absNote.style.display = "none";}
+if (a.goal === 0) {
+cardioNote.style.display = "block";
+cardioNote.innerHTML = "<b>有氧：</b>每次练后加 15–20 分钟有氧（跑步机快走、跳绳或单车），微微出汗就行，不用跑到喘不上气。";
+textLines.push("有氧：每次练后 15–20 分钟（跑步机快走 / 跳绳 / 单车）。", "");
+} else { cardioNote.style.display = "none";}
+
+var diet = dietText(a);
+$("dietText").textContent = diet;
+textLines.push("" + diet, "");
+textLines.push("练前热身 5–10 分钟，练后拉伸 5 分钟；动作标准优先于重量；关节疼立刻停；同一部位隔 48 小时再练。", "计划按 4 周一个周期，4 周后每个动作加一点重量或 1 组。");
+planText = textLines.join("\n");
+show("screen-result");
+fanfare();
+burst();
+}
+
+$("copyBtn").onclick = function () {
+var done = function () { $("copyOk").textContent = "已复制，去粘贴就能用 ✅";};
+if (navigator.clipboard && navigator.clipboard.writeText) {
+navigator.clipboard.writeText(planText).then(done, function () { fallbackCopy(); done();});
+} else { fallbackCopy(); done();}
+};
+function fallbackCopy() {
+var ta = document.createElement("textarea");
+ta.value = planText; ta.style.position = "fixed"; ta.style.opacity = "0";
+document.body.appendChild(ta); ta.select();
+try { document.execCommand("copy");} catch (e) {}
+document.body.removeChild(ta);
+}
+
+// ---------- music: Web Audio, light loop ----------
+var audioCtx = null, master = null, musicTimer = null, soundOn = true, nextTime = 0, step = 0;
+var BPM = 100, BEAT = 60 / BPM;
+var CHORDS = [
+  { root: 110.00, arp: [220.00, 261.63, 329.63] },  // Am
+  { root: 87.31,  arp: [174.61, 220.00, 261.63] },  // F
+  { root: 130.81, arp: [261.63, 329.63, 392.00] },  // C
+  { root: 98.00,  arp: [196.00, 246.94, 293.66] }   // G
+];
+function ensureCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    master = audioCtx.createGain();
+    master.gain.value = 0.12;
+    master.connect(audioCtx.destination);
+  }
+  if (audioCtx.state === "suspended") audioCtx.resume();
+}
+function tone(freq, t, dur, type, vol) {
+  var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(vol, t + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.connect(g); g.connect(master);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+function scheduleStep() {
+  if (!soundOn) return;
+  var chord = CHORDS[Math.floor(step / 4) % 4];
+  var beatInBar = step % 4;
+  if (beatInBar === 0) tone(chord.root, nextTime, BEAT * 1.8, "triangle", 0.5);
+  tone(chord.arp[beatInBar % 3], nextTime, BEAT * 0.9, "sine", 0.22);
+  if (beatInBar === 2) tone(chord.arp[(beatInBar + 1) % 3] * 2, nextTime, BEAT * 0.5, "sine", 0.10);
+  nextTime += BEAT;
+  step++;
+}
+function startMusic() {
+  ensureCtx();
+  if (musicTimer || !soundOn) return;
+  nextTime = audioCtx.currentTime + 0.1;
+  step = 0;
+  musicTimer = setInterval(function () {
+    while (soundOn && nextTime < audioCtx.currentTime + 0.3) scheduleStep();
+  }, 100);
+}
+function blip() {
+  if (!soundOn) return;
+  ensureCtx();
+  tone(660, audioCtx.currentTime, 0.12, "sine", 0.25);
+  tone(880, audioCtx.currentTime + 0.07, 0.12, "sine", 0.18);
+}
+function fanfare() {
+  if (!soundOn) return;
+  ensureCtx();
+  var t = audioCtx.currentTime;
+  [523.25, 659.25, 783.99, 1046.50].forEach(function (f, i) {
+    tone(f, t + i * 0.12, 0.35, "triangle", 0.25);
+  });
+}
+$("musicBtn").onclick = function () {
+  soundOn = !soundOn;
+  this.classList.toggle("off", !soundOn);
+  this.textContent = soundOn ? "🎵" : "🔇";
+  if (soundOn) startMusic();
+  else { clearInterval(musicTimer); musicTimer = null; }
+};
+document.addEventListener("touchstart", function once() {
+  if (soundOn) startMusic();
+  document.removeEventListener("touchstart", once);
+}, { once: true });
+
+// ---------- confetti ----------
+function burst() {
+  var c = $("confetti"), ctx = c.getContext("2d");
+  c.width = window.innerWidth; c.height = window.innerHeight;
+  var colors = ["#ff8c2e", "#ffb347", "#ffffff", "#ff5e1a", "#ffd28a"];
+  var ps = [];
+  for (var i = 0; i < 90; i++) {
+    ps.push({ x: Math.random() * c.width, y: -20 - Math.random() * 80,
+      vx: (Math.random() - 0.5) * 2.4, vy: 2 + Math.random() * 3.2,
+      s: 5 + Math.random() * 6, r: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 0.2,
+      col: colors[i % colors.length] });
+  }
+  var frames = 0;
+  (function tick() {
+    ctx.clearRect(0, 0, c.width, c.height);
+    ps.forEach(function (p) {
+      p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+      ctx.fillStyle = p.col; ctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.6);
+      ctx.restore();
+    });
+    if (++frames < 130) requestAnimationFrame(tick);
+    else ctx.clearRect(0, 0, c.width, c.height);
+  })();
+}
+</script>
+</body>
+</html>
